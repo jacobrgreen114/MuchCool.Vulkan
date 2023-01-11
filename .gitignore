@@ -1,0 +1,10 @@
+
+# Output Directories
+bin/
+obj/
+
+# Rider Files
+.idea/
+/packages/
+riderModule.iml
+/_ReSharper.Caches/
