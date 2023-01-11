@@ -12,10 +12,10 @@ public class SourceFile {
             WriteBlankLine();
         }
 
-        
-        
-        if (ns is not null)
+        if (ns is not null) {
             WriteNamespace(ns);
+            WriteBlankLine();
+        }
     }
 
     public override string ToString() {
@@ -65,7 +65,7 @@ public class SourceFile {
         WriteScopeStart();
     }
 
-    public void WriteStructField(string name, string type, string? defaultValue, AccessModifier access = AccessModifier.Unspecified, bool isReadonly = false, bool isStatic = false) {
+    public void WriteStructField(string name, string type, string? defaultValue = null, AccessModifier access = AccessModifier.Unspecified, bool isReadonly = false, bool isStatic = false) {
         _builder.WriteIndentation();
         WriteAccessModifier(access);
         _builder.WriteIf(isStatic, "static ").WriteIf(isReadonly, "readonly ");

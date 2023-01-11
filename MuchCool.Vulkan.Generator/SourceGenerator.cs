@@ -1,4 +1,5 @@
 ﻿using System.Runtime.InteropServices;
+using System.Text;
 using Microsoft.CodeAnalysis;
 using MuchCool.Vulkan.Generator.Registry;
 using MuchCool.Vulkan.Generator.Registry.Xml;
@@ -61,7 +62,7 @@ internal class SourceGenerator : ISourceGenerator {
         
         //TypeGenerator.Generate(_registry);
         HandlesGenerator.Generate(context, _registry, enabledTypes);
-        //StructGenerator.Generate(_registry, enabledTypes);
+        StructGenerator.Generate(context, _registry, enabledTypes);
         //EnumGenerator.Generate(_registry);
         //CommandGenerator.Generate(_registry, enabledCommands);
     }
@@ -135,8 +136,7 @@ public static class HandlesGenerator {
         var handles = registry.Types.Handles;
 
         var builder = new SourceFile(SourceGenerator.VULKAN_NAMESPACE, Usings);
-        builder.WriteBlankLine();
-        
+
         foreach (var handle in handles.Where(h => enabledTypes.Contains(h.Name))) {
             GenerateHandle(builder, handle);
             builder.WriteBlankLine();
@@ -157,51 +157,50 @@ public static class HandlesGenerator {
 }
 
 public static class StructGenerator {
+    private const string GENERATED_FILE = "VulkanStructs.g.cs";
+
     private static readonly string[] Usings = new[] {
         "System.Runtime.InteropServices"
     };
     
-    public static void Generate(VulkanRegistry registry, IReadOnlyList<string> enabledTypes) {
+    public static void Generate(GeneratorExecutionContext context, VulkanRegistry registry, IReadOnlyList<string> enabledTypes) {
         var structs = registry.Types.Structs;
 
-        var builder = new SourceBuilder();
-        foreach (var ns in Usings)
-            builder.Write("using ").Write(ns).WriteLine(';');
+        var builder = new SourceFile(SourceGenerator.VULKAN_NAMESPACE, Usings);
 
-        builder.WriteLine();
-        
-        foreach (var s in structs.Where(s => enabledTypes.Contains(s.Name)))
+        foreach (var s in structs.Where(s => enabledTypes.Contains(s.Name))) {
             WriteStruct(builder, s);
+            builder.WriteBlankLine();
+        }
 
-        using var sourceFile = new StreamWriter("VulkanStructs.g.cs");
-        sourceFile.Write(builder.ToString());
+        context.AddSource(GENERATED_FILE, builder.ToString());
     }
 
 
-    private static SourceBuilder WriteStruct(SourceBuilder builder, VulkanStruct s) {
-        builder
-            .WriteLine("[StructLayout(LayoutKind.Sequential)]")
-            .Write($"public unsafe struct ")
-            .Write(s.Name)
-            .WriteLine(" {")
-            .Indent();
-
+    private static void WriteStruct(SourceFile builder, VulkanStruct s) {
+        builder.WriteAttribute("StructLayout(LayoutKind.Sequential)");
+        builder.WriteStructStart(s.Name, AccessModifier.Public, true);
+        
         foreach (var field in s.Fields) {
             WriteField(builder, field);
         }
 
-        return builder.UnIndent().WriteLine("}").WriteLine();
+        builder.WriteStructEnd();
     }
 
-    private static SourceBuilder WriteField(SourceBuilder builder, VulkanField field) {
-        builder.WriteIndentation().Write("public ").Write(field.TypeName.Replace("FlagBits", "Flags"));
-        
-        for (int i = 0; i < field.PointerDepth; ++i) 
-            builder.Write('*');
-
-        return builder.Write(' ').Write(field.Name).WriteLine(";");
+    private static void WriteField(SourceFile builder, VulkanField field) {
+        var typename = CreateTypeName(field.TypeName, field.PointerDepth);
+        builder.WriteStructField(field.Name, typename, null, AccessModifier.Public);
     }
-    
+
+    private static string CreateTypeName(string baseType, int pointerDepth) {
+        var typeBuilder = new StringBuilder(baseType);
+        typeBuilder.Replace("FlagBits", "Flags");
+        for (int i = 0; i < pointerDepth; ++i) 
+            typeBuilder.Append('*');
+
+        return typeBuilder.ToString();
+    }
 }
 
 public static class EnumGenerator {
