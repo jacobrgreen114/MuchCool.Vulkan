@@ -1,0 +1,3 @@
+[submodule "External/Vulkan-Docs"]
+	path = External/Vulkan-Docs
+	url = https://github.com/KhronosGroup/Vulkan-Docs.git

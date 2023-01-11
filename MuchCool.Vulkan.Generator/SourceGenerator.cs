@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using MuchCool.Vulkan.Generator.Registry;
@@ -8,8 +9,15 @@ namespace MuchCool.Vulkan.Generator;
 
 [Generator]
 internal class SourceGenerator : ISourceGenerator {
-    private const string XML_PATH = "C:\\Users\\Jacob\\Desktop\\vk.xml";
+    private const  string VULKAN_XML_RELATIVE_PATH = "../External/Vulkan-Docs/xml/vk.xml";
+    private static string _vulkanXmlPath          = FindVulkanXmlFile();
 
+    private static string FindVulkanXmlFile([CallerFilePath] string? currentFile = null) {
+        if (currentFile is null) return string.Empty;
+        return Path.Combine(Path.GetDirectoryName(currentFile) ?? string.Empty, VULKAN_XML_RELATIVE_PATH);
+    }
+    
+    
     internal const string VULKAN_NAMESPACE = "MuchCool.Vulkan.Native";
     
     private static readonly string[] EnabledFeatures = new[] {
@@ -29,7 +37,7 @@ internal class SourceGenerator : ISourceGenerator {
     private readonly VulkanRegistry _registry;
 
     public SourceGenerator() {
-        _registry = new VulkanRegistry(XmlVulkanRegistry.FromFile(XML_PATH));
+        _registry = new VulkanRegistry(XmlVulkanRegistry.FromFile(_vulkanXmlPath));
     }
 
 
