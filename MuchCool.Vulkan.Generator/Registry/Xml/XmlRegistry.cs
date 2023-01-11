@@ -1,7 +1,6 @@
-﻿using System;
-using System.Xml.Serialization;
+﻿using System.Xml.Serialization;
 
-namespace VulkGen; 
+namespace MuchCool.Vulkan.Generator.Registry.Xml; 
 
 
 [Serializable]

@@ -1,6 +1,4 @@
-﻿using VulkGen;
-
-namespace MuchCool.Vulkan.Generator; 
+﻿namespace MuchCool.Vulkan.Generator; 
 
 public class SourceFile {
     private readonly SourceBuilder _builder = new();

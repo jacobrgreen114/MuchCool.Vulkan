@@ -1,5 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
-using VulkGen;
+using MuchCool.Vulkan.Generator.Registry;
+using MuchCool.Vulkan.Generator.Registry.Xml;
 
 namespace MuchCool.Vulkan.Generator; 
 

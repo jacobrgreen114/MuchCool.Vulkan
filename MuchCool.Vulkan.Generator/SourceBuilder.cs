@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace VulkGen; 
+namespace MuchCool.Vulkan.Generator; 
 
 public class SourceBuilder {
     private readonly StringBuilder _builder = new();

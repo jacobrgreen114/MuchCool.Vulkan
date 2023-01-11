@@ -1,8 +1,6 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+﻿using MuchCool.Vulkan.Generator.Registry;
 
-namespace VulkGen; 
+namespace MuchCool.Vulkan.Generator; 
 
 public class SourceGenerator {
     private static readonly string[] _enabledFeatures = new[] {

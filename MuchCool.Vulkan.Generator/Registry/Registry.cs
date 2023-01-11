@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
+﻿using System.Diagnostics;
+using MuchCool.Vulkan.Generator.Registry.Xml;
 
-
-namespace VulkGen; 
+namespace MuchCool.Vulkan.Generator.Registry; 
 
 public sealed class VulkanRegistry {
     
