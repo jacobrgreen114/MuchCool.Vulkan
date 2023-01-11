@@ -42,6 +42,7 @@ internal class SourceGenerator {
     private const string ENUMS_FILE_NAME = "VulkanEnums.g.cs";
     private const string HANDLES_FILE_NAME = "VulkanHandles.g.cs";
     private const string STRUCTS_FILE_NAME = "VulkanStructs.g.cs";
+    private const string COMMANDS_FILE_NAME = "VulkanCommands.g.cs";
     
     private const  string VULKAN_XML_RELATIVE_PATH = "../External/Vulkan-Docs/xml/vk.xml";
     private static string _vulkanXmlPath          = FindVulkanXmlFile();
@@ -85,7 +86,7 @@ internal class SourceGenerator {
         context.AddSource(HANDLES_FILE_NAME, HandlesGenerator.Generate(_registry, enabledTypes));
         context.AddSource(STRUCTS_FILE_NAME, StructGenerator.Generate(_registry, enabledTypes));
         context.AddSource(ENUMS_FILE_NAME, EnumGenerator.Generate(_registry));
-        //CommandGenerator.Generate(_registry, enabledCommands);
+        context.AddSource(COMMANDS_FILE_NAME, CommandGenerator.Generate(_registry, enabledCommands));
     }
 
     internal void GenerateToFiles() {
@@ -99,6 +100,9 @@ internal class SourceGenerator {
         
         using (var file = new StreamWriter(ENUMS_FILE_NAME))
             file.Write(EnumGenerator.Generate(_registry));
+        
+        using (var file = new StreamWriter(COMMANDS_FILE_NAME))
+            file.Write(CommandGenerator.Generate(_registry, enabledCommands));
     }
     
     private (string[], string[]) GetEnabledTypesAndCommands() {
@@ -337,16 +341,16 @@ public static class EnumGenerator {
 
 public static class CommandGenerator {
     
-    internal static void Generate(VulkanRegistry registry, IReadOnlyList<string> enabledCommands) {
+    internal static string Generate(VulkanRegistry registry, IReadOnlyList<string> enabledCommands) {
         var commands = registry.Commands.Values;
 
         var builder = new SourceBuilder();
+        builder.Write("using ").Write(SourceGenerator.VULKAN_NAMESPACE).WriteLine(";");
 
         foreach (var command in commands.Where(c => enabledCommands.Contains(c.Name)))
             WriteCommand(builder, command);
 
-        using var sourceFile = new StreamWriter("VulkanCommands.g.cs");
-        sourceFile.Write(builder.ToString());
+        return builder.ToString();
     }
 
     private static void WriteCommand(SourceBuilder builder, VulkanCommand command) {

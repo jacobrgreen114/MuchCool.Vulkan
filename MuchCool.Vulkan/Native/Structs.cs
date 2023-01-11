@@ -30,3 +30,12 @@ public unsafe struct VkAttachmentReference2 {
     // todo : implement
 }
 
+[StructLayout(LayoutKind.Sequential)]
+public unsafe struct VkImageBlit {
+    // todo : implement
+}
+
+[StructLayout(LayoutKind.Sequential)]
+public unsafe struct VkPhysicalDeviceMemoryProperties {
+    // todo : implement
+}

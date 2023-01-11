@@ -7,7 +7,6 @@
 		<Nullable>enable</Nullable>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
-		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 
 		<Title>MuchCool.Vulkan</Title>
 		<Authors>Jacob Green</Authors>
