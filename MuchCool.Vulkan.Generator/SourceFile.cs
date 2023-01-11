@@ -6,10 +6,14 @@ public class SourceFile {
     public SourceFile() : this(null, null){}
     
     public SourceFile(string? ns, string[]? usings) {
-        if (usings is not null)
+        if (usings is not null) {
             foreach (var use in usings) 
                 WriteUsing(use);
+            WriteBlankLine();
+        }
 
+        
+        
         if (ns is not null)
             WriteNamespace(ns);
     }
@@ -18,6 +22,9 @@ public class SourceFile {
         return _builder.ToString();
     }
 
+    public void WriteBlankLine() {
+        _builder.WriteLine();
+    }
 
     public void WriteUsing(string use) {
         _builder.WriteIndentation().Write("using ").Write(use).Terminate();
@@ -51,15 +58,19 @@ public class SourceFile {
         WriteScopeEnd();
     }
     
-    public void WriteStructStart(string name, AccessModifier acces = AccessModifier.Unspecified,  bool isUnsafe = false) {
+    public void WriteStructStart(string name, AccessModifier access = AccessModifier.Unspecified,  bool isUnsafe = false) {
         _builder.WriteIndentation();
-        WriteAccessModifier(acces);
-        _builder.WriteIf(isUnsafe, "unsafe ").Write(name);
+        WriteAccessModifier(access);
+        _builder.WriteIf(isUnsafe, "unsafe ").Write("struct ").Write(name);
         WriteScopeStart();
     }
 
-    public void WriteStructField(string name, string type, string? defaultValue) {
-        _builder.WriteIndentation().Write(type).Write(' ').Write(name);
+    public void WriteStructField(string name, string type, string? defaultValue, AccessModifier access = AccessModifier.Unspecified, bool isReadonly = false, bool isStatic = false) {
+        _builder.WriteIndentation();
+        WriteAccessModifier(access);
+        _builder.WriteIf(isStatic, "static ").WriteIf(isReadonly, "readonly ");
+            
+        _builder.Write(type).Write(' ').Write(name);
         if (defaultValue is not null)
             _builder.Write(" = ").Write(defaultValue);
         _builder.Terminate();

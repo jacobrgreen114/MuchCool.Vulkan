@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using System.Runtime.InteropServices;
+using Microsoft.CodeAnalysis;
 using MuchCool.Vulkan.Generator.Registry;
 using MuchCool.Vulkan.Generator.Registry.Xml;
 
@@ -8,18 +9,18 @@ namespace MuchCool.Vulkan.Generator;
 internal class SourceGenerator : ISourceGenerator {
     private const string XML_PATH = "C:\\Users\\Jacob\\Desktop\\vk.xml";
 
-    private const string VULKAN_NAMESPACE = "MuchCool.Vulkan.Native";
+    internal const string VULKAN_NAMESPACE = "MuchCool.Vulkan.Native";
     
-    private static readonly string[] _enabledFeatures = new[] {
+    private static readonly string[] EnabledFeatures = new[] {
         "VK_VERSION_1_0"
     };
 
 
-    private static readonly string[] _enabledAuthors = new[] {
+    private static readonly string[] EnabledAuthors = new[] {
         "KHR", "EXT"
     };
     
-    private static readonly string[] _enabledPlatforms = new[] {
+    private static readonly string[] EnabledPlatforms = new[] {
         "win32"
     };
     
@@ -33,18 +34,15 @@ internal class SourceGenerator : ISourceGenerator {
 
     public void Initialize(GeneratorInitializationContext context) { }
 
-    
-    public void Execute(GeneratorExecutionContext context) { }
-    
-    
-    public static void Generate(VulkanRegistry registry) {
+
+    public void Execute(GeneratorExecutionContext context) {
         var enabledFeatures = 
-            registry.Features.Values.Where(f => _enabledFeatures.Contains(f.Name)).ToArray();
+            _registry.Features.Values.Where(f => EnabledFeatures.Contains(f.Name)).ToArray();
         
         var enabledExtensions =
-            registry.Extensions.Values
-                .Where(e => _enabledAuthors.Contains(e.Author))
-                .Where(e => e.Platform is null || _enabledPlatforms.Contains(e.Platform)).ToArray();
+            _registry.Extensions.Values
+                .Where(e => EnabledAuthors.Contains(e.Author))
+                .Where(e => e.Platform is null || EnabledPlatforms.Contains(e.Platform)).ToArray();
 
         var featuresTypes  = enabledFeatures.Select(f => f.RequiredTypes);
         var extensionTypes = enabledExtensions.Select(e => e.RequiredTypes);
@@ -55,25 +53,26 @@ internal class SourceGenerator : ISourceGenerator {
 
         var featuresCommands  = enabledFeatures.Select(f => f.RequiredCommands);
         var extensionCommands = enabledExtensions.Select(e => e.RequiredCommands);
-        var enabledCommands   = 
+        var enabledCommands = 
             featuresCommands.Union(extensionCommands)
                 .SelectMany(c => c)
                 .Select(c => c.Name).ToArray();
         
         
-        TypeGenerator.Generate(registry);
-        HandlesGenerator.Generate(registry, enabledTypes);
-        StructGenerator.Generate(registry, enabledTypes);
-        EnumGenerator.Generate(registry);
-        CommandGenerator.Generate(registry, enabledCommands);
+        //TypeGenerator.Generate(_registry);
+        HandlesGenerator.Generate(context, _registry, enabledTypes);
+        //StructGenerator.Generate(_registry, enabledTypes);
+        //EnumGenerator.Generate(_registry);
+        //CommandGenerator.Generate(_registry, enabledCommands);
     }
-
-
+    
+    
+    
 }
 
 
 public static class TypeGenerator {
-    private static readonly Dictionary<string, string> _nativeTypes = new() {
+    private static readonly Dictionary<string, string> NativeTypes = new() {
         {"uint8_t", "System.Byte"},
         {"int8_t", "System.SByte"},
         {"uint16_t", "System.UInt16"},
@@ -103,8 +102,8 @@ public static class TypeGenerator {
         var types = registry.Types.BaseTypes;
 
         var builder = new SourceBuilder();
-
-        foreach (var type in _nativeTypes)
+        
+        foreach (var type in NativeTypes)
             WriteType(builder, type.Key, type.Value);
         
         //foreach (var type in types) {
@@ -126,34 +125,34 @@ public static class TypeGenerator {
 
 
 public static class HandlesGenerator {
+    private const string GENERATED_FILE = "VulkanHandles.g.cs";
+    
     private static readonly string[] Usings = new[] {
         "System.Runtime.InteropServices"
     };
     
-    internal static void Generate(VulkanRegistry registry, IReadOnlyList<string> enabledTypes) {
+    internal static void Generate(GeneratorExecutionContext context, VulkanRegistry registry, IReadOnlyList<string> enabledTypes) {
         var handles = registry.Types.Handles;
 
-        var builder = new SourceBuilder();
-
-        foreach (var ns in Usings)
-            builder.Write("using ").Write(ns).WriteLine(';');
-
-        builder.WriteLine();
-
+        var builder = new SourceFile(SourceGenerator.VULKAN_NAMESPACE, Usings);
+        builder.WriteBlankLine();
+        
         foreach (var handle in handles.Where(h => enabledTypes.Contains(h.Name))) {
             GenerateHandle(builder, handle);
+            builder.WriteBlankLine();
         }
 
-        using var sourceFile = new StreamWriter("VulkanHandles.g.cs");
-        sourceFile.Write(builder.ToString());
+        context.AddSource(GENERATED_FILE, builder.ToString());
     }
 
-    private static void GenerateHandle(SourceBuilder builder, VulkanHandle handle) {
-        builder.WriteIndentation().WriteLine("[StructLayout(LayoutKind.Sequential)]")
-            .Write("public unsafe struct ").Write(handle.Name).WriteLine(" {").Indent()
-            .WriteIndentation().WriteLine("private void* _handle;").WriteLine()
-            .WriteIndentation().Write("public static readonly ").Write(handle.Name).WriteLine(" Null = new();")
-            .UnIndent().WriteLine('}').WriteLine();
+    
+    private static void GenerateHandle(SourceFile builder, VulkanHandle handle) {
+        builder.WriteAttribute("StructLayout(LayoutKind.Sequential)");
+        builder.WriteStructStart(handle.Name, AccessModifier.Public, true);
+        builder.WriteStructField("_handle", "void*", null, AccessModifier.Private);
+        builder.WriteBlankLine();
+        builder.WriteStructField("Null", handle.Name, "new()", AccessModifier.Public, true, true);
+        builder.WriteStructEnd();
     }
 }
 
