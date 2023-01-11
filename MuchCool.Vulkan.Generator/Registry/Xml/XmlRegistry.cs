@@ -116,8 +116,11 @@ public struct XmlVulkanTypeMember
     public string? Type;
 
     [XmlText]
-    public string? TypeModifiers;
+    public string[]? TypeModifiers;
 
+    [XmlElement("enum")] 
+    public string? ArraySize;
+    
     [XmlAttribute("values")]
     public string? Values;
 }

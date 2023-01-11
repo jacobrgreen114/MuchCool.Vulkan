@@ -4,6 +4,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MuchCool.Vulkan", "MuchCool
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MuchCool.Vulkan.Generator", "MuchCool.Vulkan.Generator\MuchCool.Vulkan.Generator.csproj", "{0B302EF4-324C-4F49-B9B2-5158FDCDF64C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MuchCool.Vulkan.Generator.Test", "MuchCool.Vulkan.Generator.Test\MuchCool.Vulkan.Generator.Test.csproj", "{4A5CAA3F-D3A0-4041-91D0-117AB0C42014}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{0B302EF4-324C-4F49-B9B2-5158FDCDF64C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0B302EF4-324C-4F49-B9B2-5158FDCDF64C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0B302EF4-324C-4F49-B9B2-5158FDCDF64C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4A5CAA3F-D3A0-4041-91D0-117AB0C42014}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4A5CAA3F-D3A0-4041-91D0-117AB0C42014}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4A5CAA3F-D3A0-4041-91D0-117AB0C42014}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4A5CAA3F-D3A0-4041-91D0-117AB0C42014}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

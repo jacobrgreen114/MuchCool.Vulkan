@@ -1,14 +1,32 @@
-﻿using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+﻿
 using System.Text;
+using System.Runtime.CompilerServices;
 using Microsoft.CodeAnalysis;
+
 using MuchCool.Vulkan.Generator.Registry;
 using MuchCool.Vulkan.Generator.Registry.Xml;
 
-namespace MuchCool.Vulkan.Generator; 
+[assembly: InternalsVisibleTo("MuchCool.Vulkan.Generator.Test")]
+namespace MuchCool.Vulkan.Generator;
 
 [Generator]
-internal class SourceGenerator : ISourceGenerator {
+internal class Generator : ISourceGenerator {
+    public void Initialize(GeneratorInitializationContext context) {
+    }
+
+    public void Execute(GeneratorExecutionContext context) {
+        var generator = new SourceGenerator();
+        generator.Execute(context);
+    }
+}
+
+
+
+internal class SourceGenerator {
+    private const string ENUMS_FILE_NAME = "VulkanEnums.g.cs";
+    private const string HANDLES_FILE_NAME = "VulkanHandles.g.cs";
+    private const string STRUCTS_FILE_NAME = "VulkanStructs.g.cs";
+    
     private const  string VULKAN_XML_RELATIVE_PATH = "../External/Vulkan-Docs/xml/vk.xml";
     private static string _vulkanXmlPath          = FindVulkanXmlFile();
 
@@ -45,6 +63,29 @@ internal class SourceGenerator : ISourceGenerator {
 
 
     public void Execute(GeneratorExecutionContext context) {
+        var (enabledTypes, enabledCommands) = GetEnabledTypesAndCommands();
+        
+        //TypeGenerator.Generate(_registry);
+        context.AddSource(HANDLES_FILE_NAME, HandlesGenerator.Generate(_registry, enabledTypes));
+        context.AddSource(STRUCTS_FILE_NAME, StructGenerator.Generate(_registry, enabledTypes));
+        context.AddSource(ENUMS_FILE_NAME, EnumGenerator.Generate(_registry));
+        //CommandGenerator.Generate(_registry, enabledCommands);
+    }
+
+    internal void GenerateToFiles() {
+        var (enabledTypes, enabledCommands) = GetEnabledTypesAndCommands();
+
+        using (var file = new StreamWriter(HANDLES_FILE_NAME))
+            file.Write(HandlesGenerator.Generate(_registry, enabledTypes));
+        
+        using (var file = new StreamWriter(STRUCTS_FILE_NAME))
+            file.Write(StructGenerator.Generate(_registry, enabledTypes));
+        
+        using (var file = new StreamWriter(ENUMS_FILE_NAME))
+            file.Write(EnumGenerator.Generate(_registry));
+    }
+    
+    private (string[], string[]) GetEnabledTypesAndCommands() {
         var enabledFeatures = 
             _registry.Features.Values.Where(f => EnabledFeatures.Contains(f.Name)).ToArray();
         
@@ -66,16 +107,12 @@ internal class SourceGenerator : ISourceGenerator {
             featuresCommands.Union(extensionCommands)
                 .SelectMany(c => c)
                 .Select(c => c.Name).ToArray();
-        
-        
-        //TypeGenerator.Generate(_registry);
-        HandlesGenerator.Generate(context, _registry, enabledTypes);
-        StructGenerator.Generate(context, _registry, enabledTypes);
-        EnumGenerator.Generate(context, _registry);
-        //CommandGenerator.Generate(_registry, enabledCommands);
+
+        return (enabledTypes, enabledCommands);
     }
     
-    
+
+
     
 }
 
@@ -140,7 +177,7 @@ public static class HandlesGenerator {
         "System.Runtime.InteropServices"
     };
     
-    internal static void Generate(GeneratorExecutionContext context, VulkanRegistry registry, IReadOnlyList<string> enabledTypes) {
+    internal static string Generate(VulkanRegistry registry, IReadOnlyList<string> enabledTypes) {
         var handles = registry.Types.Handles;
 
         var builder = new SourceFile(SourceGenerator.VULKAN_NAMESPACE, Usings);
@@ -149,7 +186,7 @@ public static class HandlesGenerator {
             GenerateHandle(builder, handle);
         }
 
-        context.AddSource(GENERATED_FILE, builder.ToString());
+        return builder.ToString();
     }
 
     
@@ -170,17 +207,24 @@ public static class StructGenerator {
     private static readonly string[] Usings = new[] {
         "System.Runtime.InteropServices"
     };
+
+    private static readonly string[] ManuallyDefinedTypes = new[] {
+        "VkPhysicalDeviceMemoryProperties",
+        "VkImageBlit"
+    };
     
-    public static void Generate(GeneratorExecutionContext context, VulkanRegistry registry, IReadOnlyList<string> enabledTypes) {
+    public static string Generate(VulkanRegistry registry, IReadOnlyList<string> enabledTypes) {
         var structs = registry.Types.Structs;
 
         var builder = new SourceFile(SourceGenerator.VULKAN_NAMESPACE, Usings);
 
-        foreach (var s in structs.Where(s => enabledTypes.Contains(s.Name))) {
+        foreach (var s in 
+                 structs.Where(s => enabledTypes.Contains(s.Name))
+                     .Where(s => !ManuallyDefinedTypes.Contains(s.Name))) {
             WriteStruct(builder, s);
         }
 
-        context.AddSource(GENERATED_FILE, builder.ToString());
+        return builder.ToString();
     }
 
 
@@ -198,7 +242,11 @@ public static class StructGenerator {
 
     private static void WriteField(SourceFile builder, VulkanField field) {
         var typename = CreateTypeName(field.TypeName, field.PointerDepth);
-        builder.WriteStructField(field.Name, typename, null, AccessModifier.Public);
+        
+        if (!field.IsArray)
+            builder.WriteStructField(field.Name, typename, null, AccessModifier.Public);
+        else 
+            builder.WriteStructFieldArray(field.Name, typename, field.ArraySize, AccessModifier.Public);
     }
 
     private static string CreateTypeName(string baseType, int pointerDepth) {
@@ -218,7 +266,7 @@ public static class EnumGenerator {
         "System"
     };
     
-    public static void Generate(GeneratorExecutionContext context, VulkanRegistry registry) {
+    public static string Generate(VulkanRegistry registry) {
         var enums    = registry.Types.Enums;
         var bitmasks = registry.Types.Bitmasks;
 
@@ -235,7 +283,7 @@ public static class EnumGenerator {
             WriteEnum(builder, e.Value);
         }
 
-        context.AddSource(GENERATED_FILE, builder.ToString());
+        return builder.ToString();
     }
 
     public static void WriteBitmask(SourceFile builder, VulkanBitmask bitmask) {

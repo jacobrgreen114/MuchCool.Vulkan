@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using MuchCool.Vulkan.Generator.Registry.Xml;
 
 namespace MuchCool.Vulkan.Generator.Registry; 
@@ -49,11 +50,6 @@ public sealed class VulkanRegistry {
             : registry.Extensions.Where(e => e.Supported != "disabled")
                 .Select(e => new VulkanExtension(e)).ToDictionary(e => e.Name);
     }
-    
-    
-    
-    
-    
 }
 
 public sealed class VulkanPlatform  {
@@ -259,17 +255,49 @@ public sealed class VulkanStruct : VulkanType {
 }
 
 public sealed class VulkanField {
-    public string Name;
-    public string TypeName;
-    public int    PointerDepth;
-
+    public string Name         { get; }
+    public string TypeName     { get; }
+    public int    PointerDepth { get; } = 0;
+    public bool   IsArray      { get; } = false;
+    public int    ArraySize    { get; } = 0;
+    
     public VulkanField(in XmlVulkanTypeMember member) {
         if (member.Name is null || member.Type is null) throw new Exception();
         Name = Helpers.FormatFieldName(member.Name); 
 
         TypeName = Helpers.FormatTypeName((member.Type));
         
-        PointerDepth = member.TypeModifiers?.Count(c => c == '*') ?? 0;
+        if (member.TypeModifiers is not null) {
+            PointerDepth = Helpers.FindPointerDepth(member.TypeModifiers);
+            IsArray      = Helpers.IsInlineArray(member.TypeModifiers);
+
+            if (member.ArraySize is not null)
+                ArraySize = !IsArray ? 0 : Helpers.GetArraySize(member.ArraySize);
+            else {
+                if (IsArray) {
+                    foreach (var modifier in member.TypeModifiers) {
+                        if (modifier.StartsWith("["))
+                            ArraySize = ParseArray(modifier);
+                    }
+                }
+            }
+        }
+    }
+
+    // todo : make array parsing less hacky
+    private static int ParseArray(string array) {
+        if (array.Count(c => c is ']') <= 1) // not multi-dimensional
+            return int.Parse(array.Substring(1, array.Length - 2));
+        else { // multi-dimensional
+            var dimensions = array.Split(']');
+            var count      = int.Parse(dimensions[0].Substring(1));
+
+            for (int i = 1; i < dimensions.Length - 1; ++i) {
+                count *= int.Parse(dimensions[i].Substring(1));
+            }
+            
+            return count;
+        }
     }
 }
 
@@ -464,14 +492,23 @@ public static class Constants {
 }
 
 public static class Helpers {
-    public static int FindPointerDepth(string? str) {
+    public static int FindPointerDepth(IEnumerable<char>? str) {
         return str is null ? 0 : str.Count(c => c is '*');
     }
+    
+    public static int FindPointerDepth(string[]? str) {
+        return str is null ? 0 : FindPointerDepth(str.SelectMany(c => c));
+    }
 
+    public static bool IsInlineArray(string[]? typeModifiers) {
+        return typeModifiers is not null && typeModifiers.SelectMany(t => t).Contains('[');
+    }
+    
     public static bool IsConst(string? str) {
         return str is null ? false : str.Contains("const");
     }
 
+    // todo : implement generation of typedefs
     public static string FormatTypeName(string typename) {
         return typename switch {
             "char"                => "sbyte",
@@ -489,6 +526,9 @@ public static class Helpers {
             "VkFlags64" => "ulong",
             "VkDeviceSize" => "ulong",
             "VkDeviceAddress" => "ulong",
+            "VkSampleMask" => "uint",
+            "VkQueueGlobalPriorityKHR" => "uint", // todo : TEMP PATCH
+            "VkFragmentShadingRateCombinerOpKHR" => "int", // todo : TEMP PATCH
             "PFN_vkVoidFunction"  => "void*",
             "LPCWSTR"             => "char*",
             "DWORD"             => "uint",
@@ -508,6 +548,26 @@ public static class Helpers {
             "object"        => "obj",
             "event" => "evt",
             var n when true => n
+        };
+    }
+
+    // todo : implement generation of constants
+    public static int GetArraySize(string? define) {
+        return define switch {
+            "VK_MAX_PHYSICAL_DEVICE_NAME_SIZE"         => 256,
+            "VK_UUID_SIZE"                             => 16,
+            "VK_LUID_SIZE"                             => 8,
+            "VK_MAX_EXTENSION_NAME_SIZE"               => 256,
+            "VK_MAX_DESCRIPTION_SIZE"                  => 256,
+            "VK_MAX_MEMORY_TYPES"                      => 32,
+            "VK_MAX_MEMORY_HEAPS"                      => 16,
+            "VK_MAX_DEVICE_GROUP_SIZE"                 => 32,
+            "VK_MAX_DRIVER_NAME_SIZE"                  => 256,
+            "VK_MAX_DRIVER_INFO_SIZE"                  => 256,
+            "VK_MAX_GLOBAL_PRIORITY_SIZE_KHR"          => 16,
+            "VK_MAX_SHADER_MODULE_IDENTIFIER_SIZE_EXT" => 32,
+            null                                       => 0,
+            _                                          => throw new Exception()
         };
     }
 }

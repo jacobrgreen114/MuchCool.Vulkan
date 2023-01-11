@@ -75,6 +75,18 @@ public class SourceFile {
             _builder.Write(" = ").Write(defaultValue);
         _builder.Terminate();
     }
+
+    public void WriteStructFieldArray(
+        string name,               string type, int arraySize, AccessModifier access = AccessModifier.Unspecified,
+        bool   isReadonly = false, bool   isStatic = false
+    ) {
+        _builder.WriteIndentation();
+        WriteAccessModifier(access);
+        _builder.WriteIf(isStatic, "static ").WriteIf(isReadonly, "readonly ").Write("fixed ");
+        _builder.Write(type).Write(' ').Write(name);
+        _builder.Write('[').Write(arraySize.ToString()).Write(']');
+        _builder.Terminate();
+    }
     
     public void WriteStructEnd() {
         WriteScopeEnd();
