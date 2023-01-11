@@ -1,8 +1,15 @@
-﻿using MuchCool.Vulkan.Generator.Registry;
+﻿using Microsoft.CodeAnalysis;
+using MuchCool.Vulkan.Generator.Registry;
+using MuchCool.Vulkan.Generator.Registry.Xml;
 
 namespace MuchCool.Vulkan.Generator; 
 
-public class SourceGenerator {
+[Generator]
+internal class SourceGenerator : ISourceGenerator {
+    private const string XML_PATH = "C:\\Users\\Jacob\\Desktop\\vk.xml";
+
+    private const string VULKAN_NAMESPACE = "MuchCool.Vulkan.Native";
+    
     private static readonly string[] _enabledFeatures = new[] {
         "VK_VERSION_1_0"
     };
@@ -16,6 +23,18 @@ public class SourceGenerator {
         "win32"
     };
     
+
+    private readonly VulkanRegistry _registry;
+
+    public SourceGenerator() {
+        _registry = new VulkanRegistry(XmlVulkanRegistry.FromFile(XML_PATH));
+    }
+
+
+    public void Initialize(GeneratorInitializationContext context) { }
+
+    
+    public void Execute(GeneratorExecutionContext context) { }
     
     
     public static void Generate(VulkanRegistry registry) {
@@ -48,6 +67,8 @@ public class SourceGenerator {
         EnumGenerator.Generate(registry);
         CommandGenerator.Generate(registry, enabledCommands);
     }
+
+
 }
 
 
