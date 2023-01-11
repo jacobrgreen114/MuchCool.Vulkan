@@ -181,7 +181,7 @@ public sealed class VulkanBitmask : VulkanType {
         : base(VulkanTypeCategory.Bitmask, type.Name) {
         Debug.Assert(type.Category == Constants.Bitmask);
 
-        TypeName = type.Type;
+        TypeName = type.Type is null ? null : Helpers.FormatTypeName(type.Type);
         Requires = type.Requires;
         
         //if (Requires is not null)
@@ -208,7 +208,7 @@ public sealed class VulkanEnum : VulkanType {
         Debug.Assert(type.Category == Constants.Enum);
 
         
-        TypeName = type.Type;
+        TypeName = type.Type is null ? null : Helpers.FormatTypeName(type.Type);
 
         var aliasName = type.Alias;
 
@@ -224,15 +224,15 @@ public sealed class VulkanEnum : VulkanType {
         
         if (aliases.Length > 0) {
             var alias = aliases[0];
-            TypeName   = alias.TypeName;
+            TypeName   = alias.TypeName is null ? null : Helpers.FormatTypeName(alias.TypeName);
             _isBitmask = true;
         }
         
         if (Enumeration is not null && TypeName is null) {
             if (Enumeration.IsBitMask && Enumeration.BitWidth is not null) {
                 TypeName = Enumeration.BitWidth switch {
-                    32 => "VkFlags",
-                    64 => "VkFlags64",
+                    32 => "uint",
+                    64 => "ulong",
                     _ => throw new Exception()
                 };
             }
@@ -488,8 +488,14 @@ public static class Helpers {
             "VkFlags" => "uint",
             "VkFlags64" => "ulong",
             "VkDeviceSize" => "ulong",
+            "VkDeviceAddress" => "ulong",
             "PFN_vkVoidFunction"  => "void*",
             "LPCWSTR"             => "char*",
+            "DWORD"             => "uint",
+            "HANDLE"             => "void*",
+            "HINSTANCE"             => "void*",
+            "HWND"             => "void*",
+            "HMONITOR"             => "void*",
             "SECURITY_ATTRIBUTES" => "void",
             //var vk when vk.StartsWith("Vk")       => vk[2..],
             //var pfn when pfn.StartsWith("PFN_vk") => pfn.Replace("PFN_vk", "Pfn"),
