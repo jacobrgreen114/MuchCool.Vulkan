@@ -63,7 +63,7 @@ internal class SourceGenerator : ISourceGenerator {
         //TypeGenerator.Generate(_registry);
         HandlesGenerator.Generate(context, _registry, enabledTypes);
         StructGenerator.Generate(context, _registry, enabledTypes);
-        //EnumGenerator.Generate(_registry);
+        EnumGenerator.Generate(context, _registry);
         //CommandGenerator.Generate(_registry, enabledCommands);
     }
     
@@ -139,7 +139,6 @@ public static class HandlesGenerator {
 
         foreach (var handle in handles.Where(h => enabledTypes.Contains(h.Name))) {
             GenerateHandle(builder, handle);
-            builder.WriteBlankLine();
         }
 
         context.AddSource(GENERATED_FILE, builder.ToString());
@@ -153,6 +152,7 @@ public static class HandlesGenerator {
         builder.WriteBlankLine();
         builder.WriteStructField("Null", handle.Name, "new()", AccessModifier.Public, true, true);
         builder.WriteStructEnd();
+        builder.WriteBlankLine();
     }
 }
 
@@ -170,7 +170,6 @@ public static class StructGenerator {
 
         foreach (var s in structs.Where(s => enabledTypes.Contains(s.Name))) {
             WriteStruct(builder, s);
-            builder.WriteBlankLine();
         }
 
         context.AddSource(GENERATED_FILE, builder.ToString());
@@ -186,6 +185,7 @@ public static class StructGenerator {
         }
 
         builder.WriteStructEnd();
+        builder.WriteBlankLine();
     }
 
     private static void WriteField(SourceFile builder, VulkanField field) {
@@ -204,79 +204,61 @@ public static class StructGenerator {
 }
 
 public static class EnumGenerator {
+    private const string GENERATED_FILE = "VulkanEnums.g.cs";
+
     private static readonly string[] Usings = new[] {
         "System"
     };
     
-    public static void Generate(VulkanRegistry registry) {
+    public static void Generate(GeneratorExecutionContext context, VulkanRegistry registry) {
         var enums    = registry.Types.Enums;
         var bitmasks = registry.Types.Bitmasks;
 
-        var builder = new SourceBuilder();
-        foreach (var ns in Usings)
-            builder.Write("using ").Write(ns).WriteLine(';');
+        var builder = new SourceFile(SourceGenerator.VULKAN_NAMESPACE, Usings);
 
         foreach (var bitmask in bitmasks) {
             if (enums.ContainsKey(bitmask.Name)) continue;
             WriteBitmask(builder, bitmask);
         }
 
-        builder.WriteLine("// Enums");
+        builder.WriteComment("Enums");
         
         foreach (var e in enums) {
             WriteEnum(builder, e.Value);
         }
 
-        using var sourceFile = new StreamWriter("VulkanEnums.g.cs");
-        sourceFile.Write(builder.ToString());
+        context.AddSource(GENERATED_FILE, builder.ToString());
     }
 
-    public static SourceBuilder WriteBitmask(SourceBuilder builder, VulkanBitmask bitmask) {
+    public static void WriteBitmask(SourceFile builder, VulkanBitmask bitmask) {
         //if (bitmask.Requires is not null) {
         //    Debugger.Break();
         //    return builder;
         //}
         
-        builder.WriteIndentation().WriteLine("[Flags]")
-            .WriteIndentation().Write("public enum ").Write(bitmask.Name);
-
-        if (bitmask.TypeName is not null)
-            builder.Write(" : ").Write(bitmask.TypeName);
-
-        builder.WriteLine(" {").Indent();
-        
-        return builder.UnIndent()
-            .WriteIndentation().WriteLine("}").WriteLine();
+        builder.WriteAttribute("Flags");
+        builder.WriteEnumStart(bitmask.Name, bitmask.TypeName, AccessModifier.Public);
+        builder.WriteEnumEnd();
+        builder.WriteBlankLine();
     }
     
 
-    private static SourceBuilder WriteEnum(SourceBuilder builder, VulkanEnum e) {
-        builder.WriteIndentation().WriteLineIf(e.IsBitmask, "[Flags]")
-            .WriteIndentation().Write("public enum ").Write(e.Name);
-
-        if (e.TypeName is not null)
-            builder.Write(" : ").Write(e.TypeName);
-
-        builder.WriteLine(" {").Indent();
-
+    private static void WriteEnum(SourceFile builder, VulkanEnum e) {
+        if (e.IsBitmask)
+            builder.WriteAttribute("Flags");
+        
+        builder.WriteEnumStart(e.Name, e.TypeName, AccessModifier.Public);
+        
         if (e.Enumeration is not null)
             foreach (var value in e.Enumeration.Value)
                 WriteEnumerationValue(builder, value);
 
-        builder.UnIndent()
-            .WriteIndentation().WriteLine("}").WriteLine();
-
-        return builder;
+        builder.WriteEnumEnd();
+        builder.WriteBlankLine();
     }
 
-    private static SourceBuilder WriteEnumerationValue(SourceBuilder builder, VulkanEnumerationValue value) {
-        builder.WriteIndentation().Write(value.Name);
-        if (value.Value is not null) {
-            builder.Write(" = ").Write(value.Value);
-        }
-
-        builder.WriteLine(',');
-        return builder;
+    private static void WriteEnumerationValue(SourceFile builder, VulkanEnumerationValue value) {
+        builder.WriteEnumValue(value.Name, value.Value);
     }
 }
 

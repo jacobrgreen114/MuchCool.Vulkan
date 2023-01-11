@@ -41,7 +41,7 @@ public class SourceFile {
     public void WriteEnumStart(string name, string? type = null, AccessModifier access = AccessModifier.Unspecified) {
         _builder.WriteIndentation();
         WriteAccessModifier(access);
-        _builder.Write(name);
+        _builder.Write("enum ").Write(name);
         if (type is not null)
             _builder.Write(" : ").Write(type);
         WriteScopeStart();
@@ -86,6 +86,10 @@ public class SourceFile {
     
     public void WriteScopeEnd() {
         _builder.UnIndent().WriteIndentation().WriteLine("}");
+    }
+
+    public void WriteComment(string comment) {
+        _builder.Write("// ").WriteLine(comment);
     }
     
     private void WriteAccessModifier(AccessModifier access) {
