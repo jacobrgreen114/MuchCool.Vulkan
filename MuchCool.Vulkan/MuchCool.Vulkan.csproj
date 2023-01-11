@@ -1,15 +1,41 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <TargetFramework>net7.0</TargetFramework>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
-        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
-    </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net7.0</TargetFramework>
+		<PlatformTarget>x64</PlatformTarget>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 
-    <ItemGroup>
-      <ProjectReference Include="..\MuchCool.Vulkan.Generator\MuchCool.Vulkan.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-    </ItemGroup>
+		<Title>MuchCool.Vulkan</Title>
+		<Authors>Jacob Green</Authors>
+		<Copyright>Jacob Green</Copyright>
+		<Version>0.1.0</Version>
+		<VersionPrefix>alpha</VersionPrefix>
+		<Description>Low-level Vulkan Bindings</Description>
+
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<PackageLicenseFile>LICENSE</PackageLicenseFile>
+		<PackageProjectUrl></PackageProjectUrl>
+		<RepositoryType>Git</RepositoryType>
+		<RepositoryUrl>https://github.com/jacobrgreen114/MuchCool.Vulkan</RepositoryUrl>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<None Include="..\LICENSE">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+		<None Include="..\README.md">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\MuchCool.Vulkan.Generator\MuchCool.Vulkan.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+	</ItemGroup>
 
 </Project>
