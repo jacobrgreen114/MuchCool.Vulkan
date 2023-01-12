@@ -563,7 +563,7 @@ public static class Helpers {
             "uint64_t"            => "ulong",
             "int64_t"            => "long",
             "size_t"            => "ulong",
-            "VkBool32" => "uint",
+            "VkBool32" => "Bool32",
             "VkFlags" => "uint",
             "VkFlags64" => "ulong",
             "VkDeviceSize" => "ulong",

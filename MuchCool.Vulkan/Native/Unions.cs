@@ -51,10 +51,10 @@ public struct VkClearValue {
     private VkClearColorValue _value;
 }
 
-[StructLayout(LayoutKind.Sequential)]
-public unsafe struct VkDescriptorUpdateTemplate {
-    private void* _handle;
-}
+//[StructLayout(LayoutKind.Sequential)]
+//public unsafe struct VkDescriptorUpdateTemplate {
+//    private void* _handle;
+//}
 
 [StructLayout(LayoutKind.Sequential)]
 public unsafe struct VkPipelineExecutableStatisticValueKHR {

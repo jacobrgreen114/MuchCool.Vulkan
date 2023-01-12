@@ -56,7 +56,8 @@ internal class SourceGenerator {
     internal const string VULKAN_NAMESPACE = "MuchCool.Vulkan.Native";
     
     private static readonly string[] EnabledFeatures = new[] {
-        "VK_VERSION_1_0"
+        "VK_VERSION_1_0",
+        "VK_VERSION_1_1",
     };
 
 
@@ -230,7 +231,8 @@ public static class StructGenerator {
 
     private static readonly string[] ManuallyDefinedTypes = new[] {
         "VkPhysicalDeviceMemoryProperties",
-        "VkImageBlit"
+        "VkImageBlit",
+        "VkPhysicalDeviceGroupProperties"
     };
     
     public static string Generate(VulkanRegistry registry, IReadOnlyList<string> enabledTypes) {

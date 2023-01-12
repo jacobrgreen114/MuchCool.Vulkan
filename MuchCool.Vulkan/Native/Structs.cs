@@ -16,7 +16,30 @@
 
 using System.Runtime.InteropServices;
 
-namespace MuchCool.Vulkan.Native; 
+namespace MuchCool.Vulkan.Native;
+
+
+public struct Bool32 {
+    private uint _value;
+
+    public static bool operator !(Bool32 b) {
+        return b._value == VK_FALSE;
+    }
+
+    public static bool operator true(Bool32 b) {
+        return b._value != VK_FALSE;
+    }
+
+    public static bool operator false(Bool32 b) {
+        return b._value == VK_FALSE;
+    }
+
+    private const          uint   VK_TRUE  = 1;
+    private const          uint   VK_FALSE = 0;
+    public static readonly Bool32 True     = new Bool32 { _value = VK_TRUE };
+    public static readonly Bool32 False    = new Bool32 { _value = VK_FALSE };
+
+}
 
 //todo : move to manual handles
 [StructLayout(LayoutKind.Sequential)]
@@ -31,11 +54,26 @@ public unsafe struct VkAttachmentReference2 {
 }
 
 [StructLayout(LayoutKind.Sequential)]
-public unsafe struct VkImageBlit {
-    // todo : implement
+public struct VkImageBlit {
+    public VkImageSubresourceLayers srcSubresource;
+    public VkOffset3D               srcOffsets0;
+    public VkOffset3D               srcOffsets1;
+    public VkImageSubresourceLayers dstSubresource;
+    public VkOffset3D               dstOffsets0;
+    public VkOffset3D               dstOffsets1;
 }
 
 [StructLayout(LayoutKind.Sequential)]
 public unsafe struct VkPhysicalDeviceMemoryProperties {
     // todo : implement
 }
+
+[StructLayout(LayoutKind.Sequential)]
+public unsafe struct VkPhysicalDeviceGroupProperties {
+    public       VkStructureType sType;
+    public       void*           pNext;
+    public       uint            physicalDeviceCount;
+    public fixed ulong           physicalDevices[32];
+    public       uint            subsetAllocation;
+}
+

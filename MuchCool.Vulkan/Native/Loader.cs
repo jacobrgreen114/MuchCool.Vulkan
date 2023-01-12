@@ -25,7 +25,7 @@ internal static class Dll {
     internal const CharSet           CHAR_SET   = CharSet.Ansi;
 }
 
-public static class Loader {
+public static partial class Vk {
     [SuppressUnmanagedCodeSecurity]
     [DllImport(Dll.NAME, EntryPoint = "vkGetInstanceProcAddr", CallingConvention = Dll.CONVENTION, CharSet = Dll.CHAR_SET)]
     private static extern unsafe void* _GetInstanceProcAddr(VkInstance instance, string pName);  
