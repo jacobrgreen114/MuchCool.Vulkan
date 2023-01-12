@@ -395,7 +395,7 @@ public static class CommandGenerator {
     }
 
     private static void WriteCommandNames(SourceBuilder builder, IEnumerable<VulkanCommand> commands) {
-        builder.WriteIndentation().WriteLine("public static class CommandNames {").Indent();
+        builder.WriteIndentation().WriteLine("public static class ProcedureName {").Indent();
 
         foreach (var command in commands) {
             builder.WriteIndentation().Write("public const string ").Write(command.Name.Substring(2)).Write(" = ")
