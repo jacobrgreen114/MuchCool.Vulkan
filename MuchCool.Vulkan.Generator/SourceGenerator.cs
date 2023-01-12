@@ -345,8 +345,9 @@ public static class CommandGenerator {
         var commands = registry.Commands.Values;
 
         var builder = new SourceBuilder();
-        builder.Write("using ").Write(SourceGenerator.VULKAN_NAMESPACE).WriteLine(";");
-
+        builder.Write("namespace ").Write(SourceGenerator.VULKAN_NAMESPACE).WriteLine(";");
+        builder.WriteLine();
+        
         foreach (var command in commands.Where(c => enabledCommands.Contains(c.Name)))
             WriteCommand(builder, command);
 

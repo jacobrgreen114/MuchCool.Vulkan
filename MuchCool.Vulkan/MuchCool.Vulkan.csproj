@@ -11,13 +11,12 @@
 		<Title>MuchCool.Vulkan</Title>
 		<Authors>Jacob Green</Authors>
 		<Copyright>Jacob Green</Copyright>
-		<Version>0.1.1</Version>
+		<Version>0.1.2</Version>
 		<VersionPrefix>alpha</VersionPrefix>
 		<Description>Low-level Vulkan Bindings</Description>
 
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<PackageLicenseFile>LICENSE</PackageLicenseFile>
-		<PackageProjectUrl></PackageProjectUrl>
 		<RepositoryType>Git</RepositoryType>
 		<RepositoryUrl>https://github.com/jacobrgreen114/MuchCool.Vulkan</RepositoryUrl>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
