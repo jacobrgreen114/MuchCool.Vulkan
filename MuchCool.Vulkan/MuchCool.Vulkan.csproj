@@ -11,7 +11,7 @@
 		<Title>MuchCool.Vulkan</Title>
 		<Authors>Jacob Green</Authors>
 		<Copyright>Jacob Green</Copyright>
-		<Version>0.1.0</Version>
+		<Version>0.1.1</Version>
 		<VersionPrefix>alpha</VersionPrefix>
 		<Description>Low-level Vulkan Bindings</Description>
 
@@ -20,6 +20,8 @@
 		<PackageProjectUrl></PackageProjectUrl>
 		<RepositoryType>Git</RepositoryType>
 		<RepositoryUrl>https://github.com/jacobrgreen114/MuchCool.Vulkan</RepositoryUrl>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<PackageTags>vulkan</PackageTags>
 	</PropertyGroup>
 
 	<ItemGroup>
