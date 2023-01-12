@@ -18,13 +18,15 @@ using System.Runtime.InteropServices;
 
 namespace MuchCool.Vulkan.Native;
 
-public class Loader {
-    private const string DllName = "vulkan-1";
-
-    [DllImport(DllName, EntryPoint = "vkGetInstanceProcAddr", CharSet = CharSet.Ansi)]
+public static class Loader {
+    private const string            DLL_NAME   = "vulkan-1";
+    private const CallingConvention CONVENTION = CallingConvention.Winapi;
+    private const CharSet           CHAR_SET   = CharSet.Ansi;
+    
+    [DllImport(DLL_NAME, EntryPoint = "vkGetInstanceProcAddr", CallingConvention = CONVENTION, CharSet = CHAR_SET)]
     private static extern unsafe void* _GetInstanceProcAddr(VkInstance instance, string pName);  
     
-    [DllImport(DllName, EntryPoint = "vkGetDeviceProcAddr", CharSet = CharSet.Ansi)]
+    [DllImport(DLL_NAME, EntryPoint = "vkGetDeviceProcAddr", CallingConvention = CONVENTION, CharSet = CHAR_SET)]
     private static extern unsafe void* _GetDeviceProcAddr(VkDevice device, string pName);
 
 
