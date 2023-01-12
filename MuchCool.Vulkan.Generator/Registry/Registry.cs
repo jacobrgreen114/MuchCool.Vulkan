@@ -387,16 +387,40 @@ public class VulkanCommand {
 
 public class VulkanCommandParameter {
     public string Name         { get; }
-    public string TypeName         { get; }
+    public string TypeName     { get; }
     public int    PointerDepth { get; }
     public bool   IsConst      { get; }
+    public bool   Optional     { get; }
+    public bool   SemiOptional { get; }
+    public bool   IsArray      { get; }
     
     public VulkanCommandParameter(in XmlVulkanCommandParameter param) {
         Name         = Helpers.FormatFieldName(param.Name ?? throw new Exception());
-        TypeName     = Helpers.FormatTypeName(param.Type ?? throw new Exception());
+        TypeName     = Helpers.FormatTypeName(param.Type  ?? throw new Exception());
         PointerDepth = Helpers.FindPointerDepth(param.TypeModifiers) ;
         IsConst      = Helpers.IsConst(param.TypeModifiers);
+        Optional     = param.Optional?.Contains("true") ?? false;
+        SemiOptional = Optional && (param.Optional?.Contains("false") ?? false);
+        IsArray      = param.LengthParameter is not null;
     }
+
+    public bool IsInParameter => TypeName is not "void" 
+                                 && TypeName is not "sbyte"
+                                 && !Optional 
+                                 && !IsArray
+                                 && IsConst 
+                                 && PointerDepth > 0;
+
+    public bool IsRefParameter => TypeName is not "void" 
+                                  && TypeName is not "sbyte" 
+                                  && SemiOptional 
+                                  && PointerDepth > 0;
+
+    public bool IsOutParameter => TypeName is not "void" 
+                                  && TypeName is not "sbyte" 
+                                  && !IsConst 
+                                  && !Optional 
+                                  && PointerDepth > 0;
 }
 
 
@@ -520,8 +544,8 @@ public static class Helpers {
         return typeModifiers is not null && typeModifiers.SelectMany(t => t).Contains('[');
     }
     
-    public static bool IsConst(string? str) {
-        return str is null ? false : str.Contains("const");
+    public static bool IsConst(string[]? str) {
+        return str is null ? false : str.Any(s => s.Contains("const"));
     }
 
     // todo : implement generation of typedefs

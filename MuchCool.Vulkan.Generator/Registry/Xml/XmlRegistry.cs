@@ -227,7 +227,7 @@ public struct XmlVulkanCommandParameter
     public string? Name;
 
     [XmlText]
-    public string? TypeModifiers;
+    public string[]? TypeModifiers;
 
     [XmlAttribute("len")]
     public string? LengthParameter;

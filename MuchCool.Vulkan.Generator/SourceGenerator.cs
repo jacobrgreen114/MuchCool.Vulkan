@@ -386,9 +386,16 @@ public static class CommandGenerator {
     }
 
     private static void WriteParameter(SourceBuilder builder, VulkanCommandParameter parameter) {
-        builder.Write(parameter.TypeName);
+        var isIn         = parameter.IsInParameter;
+        var isOut         = parameter.IsOutParameter;
+        var isRef         = parameter.IsRefParameter;
+        var pointerDepth = !isIn && !isRef && !isOut ? parameter.PointerDepth : parameter.PointerDepth - 1;
 
-        for (int i = 0; i < parameter.PointerDepth; ++i)
+        builder.WriteIf(isIn, "in ").WriteIf(isRef, "ref ").WriteIf(isOut, "out ");
+        
+        builder.Write(parameter.TypeName);
+        
+        for (int i = 0; i < pointerDepth; ++i)
             builder.Write('*');
 
         builder.Write(' ').Write(parameter.Name);
