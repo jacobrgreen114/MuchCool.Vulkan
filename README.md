@@ -11,3 +11,5 @@ Low-level C# bindings for the Vulkan graphics api (generated from vk.xml)
 - [ ] union type code generation
 - [ ] stabilize enum generation code
 - [ ] safe Vulkan wrapper
+- [ ] remove Vk and PFN_vk prefixes from generated types
+- [ ] remove enum value prefixes and convert to PascalCase
