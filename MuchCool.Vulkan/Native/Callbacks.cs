@@ -14,17 +14,24 @@
  * see <https://www.gnu.org/licenses/>.
  */
 
+using System.Security;
+using System.Runtime.InteropServices;
+
 using size_t = System.UInt64;
 using VkBool32 = System.UInt32;
 
 namespace MuchCool.Vulkan.Native;
 
+[SuppressUnmanagedCodeSecurity]
+[UnmanagedFunctionPointer(Dll.CONVENTION, CharSet = Dll.CHAR_SET)]
 public unsafe delegate void* PFN_vkAllocationFunction(
     void* pUserData,
     size_t                                                  size,
     size_t                                                  alignment,
     VkSystemAllocationScope                                 allocationScope);
-    
+
+[SuppressUnmanagedCodeSecurity]
+[UnmanagedFunctionPointer(Dll.CONVENTION, CharSet = Dll.CHAR_SET)]
 public unsafe delegate void* PFN_vkReallocationFunction(
     void*                   pUserData,
     void*                   pOriginal,
@@ -32,28 +39,38 @@ public unsafe delegate void* PFN_vkReallocationFunction(
     size_t                  alignment,
     VkSystemAllocationScope allocationScope);
     
+[SuppressUnmanagedCodeSecurity]
+[UnmanagedFunctionPointer(Dll.CONVENTION, CharSet = Dll.CHAR_SET)]
 public unsafe delegate void PFN_vkFreeFunction(
     void* pUserData,
     void* pMemory);
     
+[SuppressUnmanagedCodeSecurity]
+[UnmanagedFunctionPointer(Dll.CONVENTION, CharSet = Dll.CHAR_SET)]
 public unsafe delegate void PFN_vkInternalAllocationNotification(
     void*                    pUserData,
     size_t                   size,
     VkInternalAllocationType allocationType,
     VkSystemAllocationScope  allocationScope);
     
+[SuppressUnmanagedCodeSecurity]
+[UnmanagedFunctionPointer(Dll.CONVENTION, CharSet = Dll.CHAR_SET)]
 public unsafe delegate void PFN_vkInternalFreeNotification(
     void*                    pUserData,
     size_t                   size,
     VkInternalAllocationType allocationType,
     VkSystemAllocationScope  allocationScope);
-    
+  
+[SuppressUnmanagedCodeSecurity]
+[UnmanagedFunctionPointer(Dll.CONVENTION, CharSet = Dll.CHAR_SET)]
 public unsafe delegate VkBool32 PFN_vkDebugUtilsMessengerCallbackEXT(
     VkDebugUtilsMessageSeverityFlagsEXT messageSeverity,
     VkDebugUtilsMessageTypeFlagsEXT        messageTypes,
     VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
     void*                                       pUserData);
 
+[SuppressUnmanagedCodeSecurity]
+[UnmanagedFunctionPointer(Dll.CONVENTION, CharSet = Dll.CHAR_SET)]
 public unsafe delegate void PFN_vkDeviceMemoryReportCallbackEXT(
     VkDeviceMemoryReportCallbackDataEXT* pCallbackData,
     void*                                pUserData);

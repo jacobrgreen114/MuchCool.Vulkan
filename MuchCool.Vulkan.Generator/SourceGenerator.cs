@@ -340,16 +340,29 @@ public static class EnumGenerator {
 
 
 public static class CommandGenerator {
+    private static readonly string[] Usings = new[] {
+        "System.Security",
+        "System.Runtime.InteropServices"
+    };
+    
     
     internal static string Generate(VulkanRegistry registry, IReadOnlyList<string> enabledCommands) {
-        var commands = registry.Commands.Values;
+        var commands = registry.Commands.Values.Where(c => enabledCommands.Contains(c.Name)).ToArray();
 
         var builder = new SourceBuilder();
+        
+        foreach (var use in Usings) {
+            builder.Write("using ").Write(use).WriteLine(';');
+        }
+
+        builder.WriteLine();
         builder.Write("namespace ").Write(SourceGenerator.VULKAN_NAMESPACE).WriteLine(";");
         builder.WriteLine();
-        
-        foreach (var command in commands.Where(c => enabledCommands.Contains(c.Name)))
+
+        foreach (var command in commands)
             WriteCommand(builder, command);
+
+        WriteCommandNames(builder, commands);
 
         return builder.ToString();
     }
@@ -357,6 +370,8 @@ public static class CommandGenerator {
     private static void WriteCommand(SourceBuilder builder, VulkanCommand command) {
         var name = command.Name.Replace("vk", "PFN_vk");
 
+        builder.WriteIndentation().WriteLine("[SuppressUnmanagedCodeSecurity]");
+        builder.WriteIndentation().WriteLine("[UnmanagedFunctionPointer(Dll.CONVENTION, CharSet = Dll.CHAR_SET)]");
         builder.WriteIndentation().Write("public unsafe delegate ").Write(command.ReturnType).Write(' ').Write(name)
             .Write('(');
 
@@ -367,7 +382,7 @@ public static class CommandGenerator {
             if (i < lastIndex) builder.Write(", ");
         }
 
-        builder.WriteLine(");");
+        builder.WriteLine(");").WriteLine();
     }
 
     private static void WriteParameter(SourceBuilder builder, VulkanCommandParameter parameter) {
@@ -377,6 +392,17 @@ public static class CommandGenerator {
             builder.Write('*');
 
         builder.Write(' ').Write(parameter.Name);
+    }
+
+    private static void WriteCommandNames(SourceBuilder builder, IEnumerable<VulkanCommand> commands) {
+        builder.WriteIndentation().WriteLine("public static class CommandNames {").Indent();
+
+        foreach (var command in commands) {
+            builder.WriteIndentation().Write("public const string ").Write(command.Name.Substring(2)).Write(" = ")
+                .Write('"').Write(command.Name).Write('"').WriteLine(';');
+        }
+
+        builder.UnIndent().WriteLine('}');
     }
 
 }
