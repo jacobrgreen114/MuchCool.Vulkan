@@ -108,6 +108,17 @@ public class SourceFile {
         WriteScopeEnd();
     }
 
+    public void WriteClassStart(string name, AccessModifier access = AccessModifier.Unspecified, bool isPartial = false, bool isUnsafe = false) {
+        _builder.WriteIndentation();
+        WriteAccessModifier(access);
+        _builder.WriteIf(isUnsafe, "unsafe ").WriteIf(isPartial, "partial ").Write("class ").Write(name);
+        WriteScopeStart();
+    }
+    
+    public void WriteClassEnd() {
+        WriteScopeEnd();
+    }
+    
     public void WriteConstructorStart(
         string typename, AccessModifier access = AccessModifier.Unspecified, bool isStatic = false
     ) {
@@ -116,7 +127,7 @@ public class SourceFile {
         _builder.Write(typename).Write('(').Write(')');
         WriteScopeStart();
     }
-
+    
     public void WriteConstructorEnd() {
         WriteScopeEnd();
     }
