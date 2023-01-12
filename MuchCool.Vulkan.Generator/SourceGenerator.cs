@@ -212,13 +212,13 @@ public static class HandlesGenerator {
 
     
     private static void GenerateHandle(SourceFile builder, VulkanHandle handle) {
-        builder.WriteAttribute("StructLayout(LayoutKind.Sequential)");
-        builder.WriteStructStart(handle.Name, AccessModifier.Public, true);
-        builder.WriteStructField("_handle", "void*", null, AccessModifier.Private);
-        builder.WriteBlankLine();
-        builder.WriteStructField("Null", handle.Name, "new()", AccessModifier.Public, true, true);
-        builder.WriteStructEnd();
-        builder.WriteBlankLine();
+        builder.WriteAttribute("StructLayout(LayoutKind.Sequential)")
+            .WriteStructStart(handle.Name, AccessModifier.Public, true)
+            .WriteStructField("_handle", "void*", null, AccessModifier.Private)
+            .WriteBlankLine()
+            .WriteStructField("Null", handle.Name, "new()", AccessModifier.Public, true, true)
+            .WriteStructEnd()
+            .WriteBlankLine();
     }
 }
 
@@ -251,8 +251,8 @@ public static class StructGenerator {
 
 
     private static void WriteStruct(SourceFile builder, VulkanStruct s) {
-        builder.WriteAttribute("StructLayout(LayoutKind.Sequential)");
-        builder.WriteStructStart(s.Name, AccessModifier.Public, true);
+        builder.WriteAttribute("StructLayout(LayoutKind.Sequential)")
+            .WriteStructStart(s.Name, AccessModifier.Public, true);
         
         foreach (var field in s.Fields) {
             WriteField(builder, field);
@@ -262,8 +262,7 @@ public static class StructGenerator {
         //builder.WriteConstructorStart(s.Name, AccessModifier.Public);
         //builder.WriteConstructorEnd();
         
-        builder.WriteStructEnd();
-        builder.WriteBlankLine();
+        builder.WriteStructEnd().WriteBlankLine();
     }
 
     private static void WriteField(SourceFile builder, VulkanField field) {
@@ -323,10 +322,9 @@ public static class EnumGenerator {
         //    return builder;
         //}
         
-        builder.WriteAttribute("Flags");
-        builder.WriteEnumStart(bitmask.Name, bitmask.TypeName, AccessModifier.Public);
-        builder.WriteEnumEnd();
-        builder.WriteBlankLine();
+        builder.WriteAttribute("Flags")
+            .WriteEnumStart(bitmask.Name, bitmask.TypeName, AccessModifier.Public)
+            .WriteEnumEnd().WriteBlankLine();
     }
     
 
@@ -340,8 +338,7 @@ public static class EnumGenerator {
             foreach (var value in e.Enumeration.Value)
                 WriteEnumerationValue(builder, value);
 
-        builder.WriteEnumEnd();
-        builder.WriteBlankLine();
+        builder.WriteEnumEnd().WriteBlankLine();
     }
 
     private static void WriteEnumerationValue(SourceFile builder, VulkanEnumerationValue value) {

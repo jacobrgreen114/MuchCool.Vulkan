@@ -14,9 +14,11 @@
  * see <https://www.gnu.org/licenses/>.
  */
 
+using Microsoft.CodeAnalysis.Operations;
+
 namespace MuchCool.Vulkan.Generator; 
 
-public class SourceFile {
+public sealed class SourceFile {
     private readonly SourceBuilder _builder = new();
 
     public SourceFile() : this(null, null){}
@@ -38,50 +40,58 @@ public class SourceFile {
         return _builder.ToString();
     }
 
-    public void WriteBlankLine() {
+    public SourceFile WriteBlankLine() {
         _builder.WriteLine();
+        return this;
     }
 
-    public void WriteUsing(string use) {
+    public SourceFile WriteUsing(string use) {
         _builder.WriteIndentation().Write("using ").Write(use).Terminate();
+        return this;
     }
 
-    public void WriteNamespace(string ns) {
+    public SourceFile WriteNamespace(string ns) {
         _builder.WriteIndentation().Write("namespace ").Write(ns).Terminate();
+        return this;
     }
 
-    public void WriteAttribute(string attr) {
+    public SourceFile WriteAttribute(string attr) {
         _builder.WriteIndentation().Write('[').Write(attr).WriteLine(']');
+        return this;
     }
 
-    public void WriteEnumStart(string name, string? type = null, AccessModifier access = AccessModifier.Unspecified) {
+    public SourceFile WriteEnumStart(string name, string? type = null, AccessModifier access = AccessModifier.Unspecified) {
         _builder.WriteIndentation();
         WriteAccessModifier(access);
         _builder.Write("enum ").Write(name);
         if (type is not null)
             _builder.Write(" : ").Write(type);
         WriteScopeStart();
+        return this;
     }
 
-    public void WriteEnumValue(string name, string? value = null) {
+    public SourceFile WriteEnumValue(string name, string? value = null) {
         _builder.WriteIndentation().Write(name);
         if (value is not null)
             _builder.Write(" = ").Write(value);
         _builder.WriteLine(',');
+        return this;
     }
 
-    public void WriteEnumEnd() {
+    public SourceFile WriteEnumEnd() {
         WriteScopeEnd();
+        return this;
     }
     
-    public void WriteStructStart(string name, AccessModifier access = AccessModifier.Unspecified,  bool isUnsafe = false) {
+    public SourceFile WriteStructStart(string name, AccessModifier access = AccessModifier.Unspecified,  bool isUnsafe = false) {
         _builder.WriteIndentation();
         WriteAccessModifier(access);
         _builder.WriteIf(isUnsafe, "unsafe ").Write("struct ").Write(name);
         WriteScopeStart();
+        return this;
     }
 
-    public void WriteStructField(string name, string type, string? defaultValue = null, AccessModifier access = AccessModifier.Unspecified, bool isReadonly = false, bool isStatic = false) {
+    public SourceFile WriteStructField(string name, string type, string? defaultValue = null, AccessModifier access = AccessModifier.Unspecified, bool isReadonly = false, bool isStatic = false) {
         _builder.WriteIndentation();
         WriteAccessModifier(access);
         _builder.WriteIf(isStatic, "static ").WriteIf(isReadonly, "readonly ");
@@ -90,9 +100,10 @@ public class SourceFile {
         if (defaultValue is not null)
             _builder.Write(" = ").Write(defaultValue);
         _builder.Terminate();
+        return this;
     }
 
-    public void WriteStructFieldArray(
+    public SourceFile WriteStructFieldArray(
         string name,               string type, int arraySize, AccessModifier access = AccessModifier.Unspecified,
         bool   isReadonly = false, bool   isStatic = false
     ) {
@@ -102,47 +113,54 @@ public class SourceFile {
         _builder.Write(type).Write(' ').Write(name);
         _builder.Write('[').Write(arraySize.ToString()).Write(']');
         _builder.Terminate();
+        return this;
     }
     
-    public void WriteStructEnd() {
+    public SourceFile WriteStructEnd() {
         WriteScopeEnd();
+        return this;
     }
 
-    public void WriteClassStart(string name, AccessModifier access = AccessModifier.Unspecified, bool isPartial = false, bool isUnsafe = false) {
+    public SourceFile WriteClassStart(string name, AccessModifier access = AccessModifier.Unspecified, bool isPartial = false, bool isUnsafe = false) {
         _builder.WriteIndentation();
         WriteAccessModifier(access);
         _builder.WriteIf(isUnsafe, "unsafe ").WriteIf(isPartial, "partial ").Write("class ").Write(name);
         WriteScopeStart();
+        return this;
     }
     
-    public void WriteClassEnd() {
+    public SourceFile WriteClassEnd() {
         WriteScopeEnd();
+        return this;
     }
     
-    public void WriteConstructorStart(
+    public SourceFile WriteConstructorStart(
         string typename, AccessModifier access = AccessModifier.Unspecified, bool isStatic = false
     ) {
         _builder.WriteIndentation();
         WriteAccessModifier(access);
         _builder.Write(typename).Write('(').Write(')');
         WriteScopeStart();
+        return this;
     }
     
-    public void WriteConstructorEnd() {
+    public SourceFile WriteConstructorEnd() {
         WriteScopeEnd();
+        return this;
     }
     
     
-    public void WriteScopeStart() {
+    private void WriteScopeStart() {
         _builder.WriteLine(" {").Indent();
     }
 
-    public void WriteScopeEnd() {
+    private void WriteScopeEnd() {
         _builder.UnIndent().WriteIndentation().WriteLine("}");
     }
 
-    public void WriteComment(string comment) {
+    public SourceFile WriteComment(string comment) {
         _builder.Write("// ").WriteLine(comment);
+        return this;
     }
     
     private void WriteAccessModifier(AccessModifier access) {
