@@ -256,17 +256,26 @@ public static class StructGenerator {
             WriteField(builder, field);
         }
 
+        //builder.WriteBlankLine();
+        //builder.WriteConstructorStart(s.Name, AccessModifier.Public);
+        //builder.WriteConstructorEnd();
+        
         builder.WriteStructEnd();
         builder.WriteBlankLine();
     }
 
     private static void WriteField(SourceFile builder, VulkanField field) {
         var typename = CreateTypeName(field.TypeName, field.PointerDepth);
-        
-        if (!field.IsArray)
-            builder.WriteStructField(field.Name, typename, null, AccessModifier.Public);
-        else 
-            builder.WriteStructFieldArray(field.Name, typename, field.ArraySize, AccessModifier.Public);
+
+        //if (field.TypeName == "VkStructureType" && field.Value is not null) {
+        //    builder.WriteStructField(field.Name, typename, $"VkStructureType.{field.Value}", AccessModifier.Private, true);
+        //}
+        //else {
+            if (!field.IsArray)
+                builder.WriteStructField(field.Name, typename, null, AccessModifier.Public);
+            else 
+                builder.WriteStructFieldArray(field.Name, typename, field.ArraySize, AccessModifier.Public);
+        //}
     }
 
     private static string CreateTypeName(string baseType, int pointerDepth) {

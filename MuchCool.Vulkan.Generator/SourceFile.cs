@@ -108,10 +108,24 @@ public class SourceFile {
         WriteScopeEnd();
     }
 
+    public void WriteConstructorStart(
+        string typename, AccessModifier access = AccessModifier.Unspecified, bool isStatic = false
+    ) {
+        _builder.WriteIndentation();
+        WriteAccessModifier(access);
+        _builder.Write(typename).Write('(').Write(')');
+        WriteScopeStart();
+    }
+
+    public void WriteConstructorEnd() {
+        WriteScopeEnd();
+    }
+    
+    
     public void WriteScopeStart() {
         _builder.WriteLine(" {").Indent();
     }
-    
+
     public void WriteScopeEnd() {
         _builder.UnIndent().WriteIndentation().WriteLine("}");
     }

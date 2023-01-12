@@ -271,17 +271,18 @@ public sealed class VulkanStruct : VulkanType {
 }
 
 public sealed class VulkanField {
-    public string Name         { get; }
-    public string TypeName     { get; }
-    public int    PointerDepth { get; } = 0;
-    public bool   IsArray      { get; } = false;
-    public int    ArraySize    { get; } = 0;
+    public string  Name         { get; }
+    public string  TypeName     { get; }
+    public string? Value        { get; }
+    public int     PointerDepth { get; } = 0;
+    public bool    IsArray      { get; } = false;
+    public int     ArraySize    { get; } = 0;
     
     public VulkanField(in XmlVulkanTypeMember member) {
         if (member.Name is null || member.Type is null) throw new Exception();
-        Name = Helpers.FormatFieldName(member.Name); 
-
+        Name     = Helpers.FormatFieldName(member.Name);
         TypeName = Helpers.FormatTypeName((member.Type));
+        Value    = member.Values;
         
         if (member.TypeModifiers is not null) {
             PointerDepth = Helpers.FindPointerDepth(member.TypeModifiers);
@@ -420,6 +421,7 @@ public class VulkanCommandParameter {
                                   && TypeName is not "sbyte" 
                                   && !IsConst 
                                   && !Optional 
+                                  && !IsArray
                                   && PointerDepth > 0;
 }
 

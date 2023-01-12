@@ -9,16 +9,20 @@
 		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
 
 		<Title>MuchCool.Vulkan</Title>
+		<Description>Low-level Vulkan Bindings</Description>
+		
 		<Authors>Jacob Green</Authors>
 		<Copyright>Jacob Green</Copyright>
+		
 		<VersionPrefix>0.1.2</VersionPrefix>
 		<VersionSuffix>alpha</VersionSuffix>
-		<Description>Low-level Vulkan Bindings</Description>
 
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<PackageLicenseFile>LICENSE</PackageLicenseFile>
+		
 		<RepositoryType>Git</RepositoryType>
 		<RepositoryUrl>https://github.com/jacobrgreen114/MuchCool.Vulkan</RepositoryUrl>
+		
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<PackageTags>vulkan</PackageTags>
 	</PropertyGroup>
